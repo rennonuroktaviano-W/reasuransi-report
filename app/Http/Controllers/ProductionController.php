@@ -22,7 +22,7 @@ class ProductionController extends Controller
             $search = trim($search);
             $query->where(function ($q) use ($search) {
                 $q->where('policy_number', 'like', "%{$search}%")
-                  ->orWhere('insured_name', 'like', "%{$search}%");
+                    ->orWhere('insured_name', 'like', "%{$search}%");
             });
         }
 

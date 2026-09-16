@@ -4,7 +4,6 @@ namespace App\Exports\Sheets;
 
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -31,7 +30,7 @@ trait PreparesReportSheet
 
     protected function applyHeader(Worksheet $sheet, string $lastColumn): void
     {
-        $range = 'A3:' . $lastColumn . '3';
+        $range = 'A3:'.$lastColumn.'3';
         $style = $sheet->getStyle($range);
         $style->getFont()->setBold(true)->setSize(11)->getColor()->setRGB('FFFFFF');
         $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('2E74B5');
@@ -75,7 +74,7 @@ trait PreparesReportSheet
     }
 
     /**
-     * @param array<string, int> $widths  peta kolom => lebar
+     * @param  array<string, int>  $widths  peta kolom => lebar
      */
     protected function applyColumnWidths(Worksheet $sheet, array $widths): void
     {

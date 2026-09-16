@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class FinancialSummarySheet implements FromCollection, WithTitle, WithEvents
+class FinancialSummarySheet implements FromCollection, WithEvents, WithTitle
 {
     use PreparesReportSheet;
 
@@ -33,8 +33,8 @@ class FinancialSummarySheet implements FromCollection, WithTitle, WithEvents
         $premiLast = 3 + $this->productionsCount;
         $claimLast = 3 + $this->claimsCount;
 
-        $premiRange = self::PREMI_SHEET . '!H4:H' . max(4, $premiLast);
-        $recoveryRange = self::CLAIM_SHEET . '!H4:H' . max(4, $claimLast);
+        $premiRange = self::PREMI_SHEET.'!H4:H'.max(4, $premiLast);
+        $recoveryRange = self::CLAIM_SHEET.'!H4:H'.max(4, $claimLast);
 
         $commissionRate = (float) ReportSetting::current()->commission_rate;
 
@@ -42,11 +42,11 @@ class FinancialSummarySheet implements FromCollection, WithTitle, WithEvents
             ['', '', ''],
             ['', '', ''],
             ['Metrik', 'Nilai (Rp)', 'Keterangan'],
-            ['Premi Reasuransi Gross', '=SUM(' . $premiRange . ')', 'Jumlah seluruh premi reasuransi'],
+            ['Premi Reasuransi Gross', '=SUM('.$premiRange.')', 'Jumlah seluruh premi reasuransi'],
             ['Tarif Komisi Reasuransi', $commissionRate, 'Persentase komisi dari premi gross'],
             ['Komisi Reasuransi', '=B4*B5', 'Premi gross dikali tarif komisi'],
             ['Premi Reasuransi Netto', '=B4-B6', 'Premi gross dikurangi komisi'],
-            ['Recovery Klaim', '=SUM(' . $recoveryRange . ')', 'Jumlah seluruh recovery klaim'],
+            ['Recovery Klaim', '=SUM('.$recoveryRange.')', 'Jumlah seluruh recovery klaim'],
             ['Saldo Netto Setelah Klaim', '=B7-B8', 'Premi netto dikurangi recovery klaim'],
         ];
 

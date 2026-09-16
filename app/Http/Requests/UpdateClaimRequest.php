@@ -28,7 +28,7 @@ class UpdateClaimRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                'unique:reinsurance_claims,claim_number,' . $this->route('claim')?->id,
+                'unique:reinsurance_claims,claim_number,'.$this->route('claim')?->id,
             ],
             'production_id' => ['required', 'integer', 'exists:reinsurance_productions,id'],
             'claim_cause' => ['required', 'string'],

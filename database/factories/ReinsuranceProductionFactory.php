@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\ReinsuranceProduction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ReinsuranceProduction>
+ * @extends Factory<ReinsuranceProduction>
  */
 class ReinsuranceProductionFactory extends Factory
 {
@@ -16,7 +17,7 @@ class ReinsuranceProductionFactory extends Factory
         $retention = round($sumInsured - $cededAmount, 2);
 
         return [
-            'policy_number' => 'POL-' . strtoupper(fake()->unique()->bothify('####??')),
+            'policy_number' => 'POL-'.strtoupper(fake()->unique()->bothify('####??')),
             'insured_name' => fake()->name(),
             'birth_date' => fake()->date('Y-m-d', '-18 years'),
             'sum_insured' => $sumInsured,

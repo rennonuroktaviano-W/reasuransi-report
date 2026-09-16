@@ -28,7 +28,7 @@ class UpdateProductionRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                'unique:reinsurance_productions,policy_number,' . $this->route('production')?->id,
+                'unique:reinsurance_productions,policy_number,'.$this->route('production')?->id,
             ],
             'insured_name' => ['required', 'string', 'max:150'],
             'birth_date' => ['required', 'date', 'before:today'],

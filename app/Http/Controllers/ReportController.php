@@ -10,8 +10,8 @@ class ReportController extends Controller
 {
     public function download(): BinaryFileResponse
     {
-        $filename = 'laporan_reasuransi_' . now()->format('Y-m-d_His') . '.xlsx';
+        $filename = 'laporan_reasuransi_'.now()->format('Y-m-d_His').'.xlsx';
 
-        return Excel::download(new ReinsuranceWorkbookExport(), $filename);
+        return Excel::download(new ReinsuranceWorkbookExport, $filename);
     }
 }

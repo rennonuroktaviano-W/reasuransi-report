@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\ReinsuranceClaim;
 use App\Models\ReinsuranceProduction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ReinsuranceClaim>
+ * @extends Factory<ReinsuranceClaim>
  */
 class ReinsuranceClaimFactory extends Factory
 {
@@ -16,7 +17,7 @@ class ReinsuranceClaimFactory extends Factory
         $recovery = fake()->randomFloat(2, $totalClaimValue * 0.2, $totalClaimValue);
 
         return [
-            'claim_number' => 'KLM-' . strtoupper(fake()->unique()->bothify('####??')),
+            'claim_number' => 'KLM-'.strtoupper(fake()->unique()->bothify('####??')),
             'production_id' => ReinsuranceProduction::factory(),
             'claim_cause' => fake()->sentence(6),
             'total_claim_value' => $totalClaimValue,

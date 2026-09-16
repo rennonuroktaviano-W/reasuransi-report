@@ -7,6 +7,7 @@ use App\Models\ReinsuranceClaim;
 use App\Models\ReinsuranceProduction;
 use App\Models\ReportSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
@@ -76,8 +77,8 @@ class ReportExportTest extends TestCase
     {
         $this->seedDataset();
 
-        Excel::store(new ReinsuranceWorkbookExport(), 'test_workbook.xlsx', 'local');
-        $path = \Illuminate\Support\Facades\Storage::disk('local')->path('test_workbook.xlsx');
+        Excel::store(new ReinsuranceWorkbookExport, 'test_workbook.xlsx', 'local');
+        $path = Storage::disk('local')->path('test_workbook.xlsx');
 
         $spreadsheet = IOFactory::load($path);
 
@@ -91,8 +92,8 @@ class ReportExportTest extends TestCase
     {
         $this->seedDataset();
 
-        Excel::store(new ReinsuranceWorkbookExport(), 'test_sheet1.xlsx', 'local');
-        $path = \Illuminate\Support\Facades\Storage::disk('local')->path('test_sheet1.xlsx');
+        Excel::store(new ReinsuranceWorkbookExport, 'test_sheet1.xlsx', 'local');
+        $path = Storage::disk('local')->path('test_sheet1.xlsx');
 
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getSheet(0);
@@ -109,8 +110,8 @@ class ReportExportTest extends TestCase
     {
         $this->seedDataset();
 
-        Excel::store(new ReinsuranceWorkbookExport(), 'test_sheet3.xlsx', 'local');
-        $path = \Illuminate\Support\Facades\Storage::disk('local')->path('test_sheet3.xlsx');
+        Excel::store(new ReinsuranceWorkbookExport, 'test_sheet3.xlsx', 'local');
+        $path = Storage::disk('local')->path('test_sheet3.xlsx');
 
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getSheet(2);

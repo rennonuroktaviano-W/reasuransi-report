@@ -1,58 +1,142 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Reasuransi Report
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Generator Laporan Reasuransi — aplikasi web lokal berbasis **Laravel + React (Inertia.js) + Tailwind CSS + MySQL** untuk mengelola data produksi premi dan klaim, lalu menghasilkan satu file Excel dengan **tiga worksheet** yang rapi sesuai struktur laporan.
 
-## About Laravel
+## Teknologi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Komponen | Pilihan |
+|---|---|
+| Backend | Laravel 13 + Eloquent ORM + Form Request |
+| Frontend | React via Inertia.js |
+| Styling | Tailwind CSS v4 |
+| Database | MySQL |
+| Excel | maatwebsite/excel (PhpSpreadsheet) |
+| Build tool | Vite |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- CRUD data produksi & premi (polis) dengan pencarian dan pagination
+- CRUD data klaim reasuransi dengan pilihan polis dan filter status
+- Halaman ringkasan keuangan dengan perhitungan server-side
+- Generate & download workbook Excel **3 worksheet**:
+  1. **Borderaux Premi** — Laporan Produksi & Premi Reasuransi
+  2. **Borderaux Klaim** — Laporan Klaim Reasuransi
+  3. **Ringkasan Keuangan** — Ringkasan akun keuangan dengan formula lintas-sheet
+- Validasi input lengkap di sisi server
+- Format angka Rupiah, bahasa Indonesia, zona waktu Asia/Jakarta
 
-## Learning Laravel
+## Prasyarat
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- [Laragon](https://laragon.org/) lengkap (Apache/Nginx + PHP `8.3+` + MySQL)
+- Composer
+- Node.js + npm
+- Browser Chrome/Chromium terbaru
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Periksa versi yang tersedia:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```sh
+php -v
+composer -V
+node -v
+npm -v
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Instalasi di Laragon
 
-## Contributing
+1. **Clone/masukkan project** ke folder `C:\laragon\www\reasuransi-report`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Buat database** kosong di MySQL melalui HeidiSQL / phpMyAdmin:
+   ```
+   Nama database: reasuransi-report
+   ```
 
-## Code of Conduct
+3. **Konfigurasi `.env`** (salin dari `.env.example` jika belum ada):
+   ```ini
+   APP_NAME="Reasuransi Report"
+   APP_URL=http://localhost:8000
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=reasuransi-report
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
 
-## Security Vulnerabilities
+4. **Install dependencies & jalankan migrasi + seed:**
+   ```sh
+   composer install
+   npm install
+   php artisan key:generate
+   php artisan migrate:fresh --seed
+   npm run build
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Jalankan aplikasi:**
+   ```sh
+   php artisan serve
+   ```
+   Buka `http://localhost:8000` di browser.
 
-## License
+   Untuk pengembangan frontend (hot reload):
+   ```sh
+   npm run dev
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Menghasilkan Laporan Excel
+
+- Klik tombol **"Generate Excel"** di sidebar, Dashboard, atau halaman Ringkasan.
+- File diunduh dengan nama: `laporan_reasuransi_YYYY-MM-DD_HHmmss.xlsx`
+- Workbook berisi tepat tiga worksheet sesuai urutan:
+  `Borderaux Premi` → `Borderaux Klaim` → `Ringkasan Keuangan`.
+
+Workbook contoh hasil dari seed data tersedia di `examples/laporan_reasuransi_contoh.xlsx`.
+
+## Perhitungan Ringkasan
+
+```
+total_premi_gross  = SUM(reinsurance_premium)
+komisi_reasuransi  = total_premi_gross * commission_rate (default 10%)
+premi_netto        = total_premi_gross - komisi_reasuransi
+total_recovery     = SUM(reinsurance_recovery)
+saldo_akhir        = premi_netto - total_recovery
+```
+
+Seluruh perhitungan berada di `App\Services\FinancialSummaryService` (sumber kebenaran tunggal) dan direplikasi sebagai formula Excel di worksheet Ringkasan Keuangan.
+
+## Menjalankan Test
+
+```sh
+php artisan test
+```
+
+Cakupan test: CRUD produksi & klaim, validasi batas, perhitungan ringkasan, dan ekspor workbook (struktur sheet, formula, nama file).
+
+## Struktur Direktori Utama
+
+```
+app/
+├── Exports/                 # Export workbook multi-sheet
+│   ├── ReinsuranceWorkbookExport.php
+│   └── Sheets/              # 3 class sheet + trait styling
+├── Http/
+│   ├── Controllers/         # Dashboard, Production, Claim, Summary, Report
+│   └── Requests/            # Form Request validasi
+├── Models/                  # ReinsuranceProduction, ReinsuranceClaim, ReportSetting
+└── Services/                # FinancialSummaryService, ReinsuranceReportService
+resources/
+└── js/
+    ├── Layouts/AppLayout.jsx
+    ├── Pages/               # Dashboard, Productions, Claims, Summary
+    └── Components/          # DataTable, CurrencyInput, ConfirmDialog, FlashMessage, Pagination
+```
+
+## Route Minimum
+
+| Method | Route | Deskripsi |
+|---|---|---|
+| GET | `/` | Dashboard |
+| RESOURCE | `/productions` | CRUD produksi & premi |
+| RESOURCE | `/claims` | CRUD klaim |
+| GET | `/summary` | Preview ringkasan |
+| GET | `/reports/reinsurance.xlsx` | Generate & download workbook |

@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ProductionPremiumSheet implements FromCollection, WithTitle, WithEvents
+class ProductionPremiumSheet implements FromCollection, WithEvents, WithTitle
 {
     use PreparesReportSheet;
 
@@ -60,7 +60,7 @@ class ProductionPremiumSheet implements FromCollection, WithTitle, WithEvents
         $this->dataLastRow = $dataLast;
 
         $sumFormula = $dataLast >= 4
-            ? '=SUM(H4:H' . $dataLast . ')'
+            ? '=SUM(H4:H'.$dataLast.')'
             : '=SUM(H4:H3)';
 
         $rows = [
@@ -91,12 +91,12 @@ class ProductionPremiumSheet implements FromCollection, WithTitle, WithEvents
             AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet->getDelegate();
                 $dataLast = $this->dataLastRow ?? 3;
-                $totalRow = 'A' . ($dataLast + 1) . ':' . self::LAST_COLUMN . ($dataLast + 1);
+                $totalRow = 'A'.($dataLast + 1).':'.self::LAST_COLUMN.($dataLast + 1);
 
                 $sheet->setCellValue('A1', 'Laporan Produksi & Premi Reasuransi (Borderaux Premi)');
                 $this->applyTitle($sheet, 'Laporan Produksi & Premi Reasuransi (Borderaux Premi)', 'A1:H1', 8);
                 $this->applyHeader($sheet, self::LAST_COLUMN);
-                $this->applyTableBorders($sheet, self::FIRST_COLUMN . '3:' . self::LAST_COLUMN . ($dataLast + 1));
+                $this->applyTableBorders($sheet, self::FIRST_COLUMN.'3:'.self::LAST_COLUMN.($dataLast + 1));
                 $this->applyZebra($sheet, 'A', 'H', 'F2F2F2');
                 $this->applyColumnWidths($sheet, [
                     'A' => 16,
@@ -115,13 +115,13 @@ class ProductionPremiumSheet implements FromCollection, WithTitle, WithEvents
                         $this->setColumnNumberFormat($sheet, $column, '4', (string) $dataLast, '#,##0');
                     }
 
-                    $this->applyAlignment($sheet, 'A4:A' . $dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'C4:C' . $dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'G4:G' . $dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'D4:H' . $dataLast, Alignment::HORIZONTAL_RIGHT);
+                    $this->applyAlignment($sheet, 'A4:A'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'C4:C'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'G4:G'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'D4:H'.$dataLast, Alignment::HORIZONTAL_RIGHT);
                 }
 
-                $sheet->mergeCells('A' . ($dataLast + 1) . ':G' . ($dataLast + 1));
+                $sheet->mergeCells('A'.($dataLast + 1).':G'.($dataLast + 1));
                 $this->applyTotalStyle($sheet, $totalRow);
                 $this->setColumnNumberFormat($sheet, 'H', '4', (string) ($dataLast + 1), '#,##0');
 

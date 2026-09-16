@@ -24,9 +24,9 @@ class ClaimController extends Controller
             $search = trim($search);
             $query->where(function ($q) use ($search) {
                 $q->where('claim_number', 'like', "%{$search}%")
-                  ->orWhereHas('production', function ($p) use ($search) {
-                      $p->where('policy_number', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('production', function ($p) use ($search) {
+                        $p->where('policy_number', 'like', "%{$search}%");
+                    });
             });
         }
 

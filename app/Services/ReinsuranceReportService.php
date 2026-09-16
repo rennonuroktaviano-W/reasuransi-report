@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ReinsuranceClaim;
 use App\Models\ReinsuranceProduction;
 
 class ReinsuranceReportService
@@ -27,7 +28,7 @@ class ReinsuranceReportService
     {
         return [
             'productions_count' => ReinsuranceProduction::query()->count(),
-            'claims_count' => \App\Models\ReinsuranceClaim::query()->count(),
+            'claims_count' => ReinsuranceClaim::query()->count(),
         ];
     }
 }

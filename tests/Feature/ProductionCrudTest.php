@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ReinsuranceClaim;
 use App\Models\ReinsuranceProduction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -85,7 +86,7 @@ class ProductionCrudTest extends TestCase
     public function test_polis_yang_memiliki_klaim_tidak_dapat_dihapus(): void
     {
         $production = ReinsuranceProduction::factory()->create();
-        \App\Models\ReinsuranceClaim::factory()->create(['production_id' => $production->id]);
+        ReinsuranceClaim::factory()->create(['production_id' => $production->id]);
 
         $this->delete(route('productions.destroy', $production))
             ->assertRedirect(route('productions.index'))

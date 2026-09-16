@@ -15,8 +15,8 @@ class ReinsuranceWorkbookExport implements Export, WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new ProductionPremiumSheet(),
-            new ReinsuranceClaimSheet(),
+            new ProductionPremiumSheet,
+            new ReinsuranceClaimSheet,
             new FinancialSummarySheet(
                 (int) ReinsuranceProduction::query()->count(),
                 (int) ReinsuranceClaim::query()->count(),
