@@ -63,17 +63,18 @@ class ReinsuranceClaimSheet implements FromCollection, WithEvents, WithTitle
             ];
         })->toArray();
 
-        $dataLast = 3 + count($data);
+        $dataLast = ReportDesign::DATA_START_ROW + count($data) - 1;
         $this->dataLastRow = $dataLast;
 
-        $sumTotal = $dataLast >= 4
-            ? '=SUM(F4:F'.$dataLast.')'
-            : '=SUM(F4:F3)';
-        $sumRecovery = $dataLast >= 4
-            ? '=SUM(H4:H'.$dataLast.')'
-            : '=SUM(H4:H3)';
+        $safeStart = ReportDesign::DATA_START_ROW;
+        $safeEnd = $dataLast >= $safeStart ? $dataLast : $safeStart - 1;
+        $sumTotal = '=SUM(F'.$safeStart.':F'.$safeEnd.')';
+        $sumRecovery = '=SUM(H'.$safeStart.':H'.$safeEnd.')';
 
         $rows = [
+            array_fill(0, 10, ''),
+            array_fill(0, 10, ''),
+            array_fill(0, 10, ''),
             array_fill(0, 10, ''),
             array_fill(0, 10, ''),
             $headers,
@@ -102,14 +103,23 @@ class ReinsuranceClaimSheet implements FromCollection, WithEvents, WithTitle
         return [
             AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet->getDelegate();
-                $dataLast = $this->dataLastRow ?? 3;
-                $totalRow = 'A'.($dataLast + 1).':'.self::LAST_COLUMN.($dataLast + 1);
+                $dataLast = $this->dataLastRow ?? ReportDesign::HEADER_ROW;
+                $totalRow = $dataLast + 1;
 
-                $sheet->setCellValue('A1', 'Laporan Klaim Reasuransi (Borderaux Klaim)');
-                $this->applyTitle($sheet, 'Laporan Klaim Reasuransi (Borderaux Klaim)', 'A1:J1', 10);
+                $this->applyCompanyHeader(
+                    $sheet,
+                    self::LAST_COLUMN,
+                    'LAPORAN KLAIM REASURANSI — BORDERAUX KLAIM'
+                );
+                $this->applyGroupBands($sheet, [
+                    'A:B' => 'KODE',
+                    'C:E' => 'DATA TERTANGGUNG',
+                    'F:I' => 'NILAI KLAIM (Rp)',
+                    'J:J' => 'STATUS',
+                ]);
                 $this->applyHeader($sheet, self::LAST_COLUMN);
-                $this->applyTableBorders($sheet, self::FIRST_COLUMN.'3:'.self::LAST_COLUMN.($dataLast + 1));
-                $this->applyZebra($sheet, 'A', 'J', 'F2F2F2');
+                $this->applyTableBorders($sheet, self::FIRST_COLUMN.ReportDesign::HEADER_ROW.':'.self::LAST_COLUMN.$totalRow);
+                $this->applyZebra($sheet, 'A', 'J');
                 $this->applyColumnWidths($sheet, [
                     'A' => 14,
                     'B' => 16,
@@ -123,28 +133,31 @@ class ReinsuranceClaimSheet implements FromCollection, WithEvents, WithTitle
                     'J' => 20,
                 ]);
 
-                if ($dataLast >= 4) {
-                    $this->setColumnNumberFormat($sheet, 'E', '4', (string) $dataLast, 'dd/mm/yyyy');
+                if ($dataLast >= ReportDesign::DATA_START_ROW) {
+                    $this->setColumnNumberFormat($sheet, 'E', (string) ReportDesign::DATA_START_ROW, (string) $dataLast, 'dd/mm/yyyy');
                     foreach (['F', 'G', 'H', 'I'] as $column) {
-                        $this->setColumnNumberFormat($sheet, $column, '4', (string) $dataLast, '#,##0');
+                        $this->setColumnNumberFormat($sheet, $column, (string) ReportDesign::DATA_START_ROW, (string) $dataLast, '#,##0');
                     }
 
-                    $this->applyAlignment($sheet, 'A4:B'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'E4:E'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'J4:J'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'F4:I'.$dataLast, Alignment::HORIZONTAL_RIGHT);
+                    $this->applyAlignment($sheet, 'A'.ReportDesign::DATA_START_ROW.':B'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'E'.ReportDesign::DATA_START_ROW.':E'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'J'.ReportDesign::DATA_START_ROW.':J'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'F'.ReportDesign::DATA_START_ROW.':I'.$dataLast, Alignment::HORIZONTAL_RIGHT);
 
-                    $sheet->getStyle('D4:D'.$dataLast)->getAlignment()->setWrapText(true);
-                    $sheet->getStyle('J4:J'.$dataLast)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle('D'.ReportDesign::DATA_START_ROW.':D'.$dataLast)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle('J'.ReportDesign::DATA_START_ROW.':J'.$dataLast)->getAlignment()->setWrapText(true);
                 }
 
-                $sheet->mergeCells('A'.($dataLast + 1).':E'.($dataLast + 1));
-                $this->applyTotalStyle($sheet, $totalRow);
+                $sheet->mergeCells('A'.$totalRow.':E'.$totalRow);
+                $this->applyTotalRow($sheet, 'A'.$totalRow.':'.self::LAST_COLUMN.$totalRow);
                 foreach (['F', 'H'] as $column) {
-                    $this->setColumnNumberFormat($sheet, $column, '4', (string) ($dataLast + 1), '#,##0');
+                    $this->setColumnNumberFormat($sheet, $column, (string) ReportDesign::DATA_START_ROW, (string) $totalRow, '#,##0');
                 }
+                $this->applyAlignment($sheet, 'A'.$totalRow.':E'.$totalRow, Alignment::HORIZONTAL_CENTER);
 
                 $this->freezeAndFilter($sheet, self::LAST_COLUMN);
+                $this->applySignatureFooter($sheet, self::LAST_COLUMN, $totalRow + 2);
+                $this->applyDisclaimer($sheet, self::LAST_COLUMN, $totalRow + 6);
                 $this->setupPrint($sheet);
             },
         ];

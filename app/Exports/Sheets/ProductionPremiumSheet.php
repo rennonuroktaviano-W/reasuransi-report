@@ -56,14 +56,17 @@ class ProductionPremiumSheet implements FromCollection, WithEvents, WithTitle
             ];
         })->toArray();
 
-        $dataLast = 3 + count($data);
+        $dataLast = ReportDesign::DATA_START_ROW + count($data) - 1;
         $this->dataLastRow = $dataLast;
 
-        $sumFormula = $dataLast >= 4
-            ? '=SUM(H4:H'.$dataLast.')'
-            : '=SUM(H4:H3)';
+        $sumFormula = $dataLast >= ReportDesign::DATA_START_ROW
+            ? '=SUM(H'.ReportDesign::DATA_START_ROW.':H'.$dataLast.')'
+            : '=SUM(H'.ReportDesign::DATA_START_ROW.':H'.(ReportDesign::DATA_START_ROW - 1).')';
 
         $rows = [
+            array_fill(0, 8, ''),
+            array_fill(0, 8, ''),
+            array_fill(0, 8, ''),
             array_fill(0, 8, ''),
             array_fill(0, 8, ''),
             $headers,
@@ -90,14 +93,22 @@ class ProductionPremiumSheet implements FromCollection, WithEvents, WithTitle
         return [
             AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet->getDelegate();
-                $dataLast = $this->dataLastRow ?? 3;
-                $totalRow = 'A'.($dataLast + 1).':'.self::LAST_COLUMN.($dataLast + 1);
+                $dataLast = $this->dataLastRow ?? ReportDesign::HEADER_ROW;
+                $totalRow = $dataLast + 1;
 
-                $sheet->setCellValue('A1', 'Laporan Produksi & Premi Reasuransi (Borderaux Premi)');
-                $this->applyTitle($sheet, 'Laporan Produksi & Premi Reasuransi (Borderaux Premi)', 'A1:H1', 8);
+                $this->applyCompanyHeader(
+                    $sheet,
+                    self::LAST_COLUMN,
+                    'LAPORAN PRODUKSI & PREMI REASURANSI — BORDERAUX PREMI'
+                );
+                $this->applyGroupBands($sheet, [
+                    'A:C' => 'INFORMASI POLIS',
+                    'D:F' => 'UANG PERTANGGUNGAN (Rp)',
+                    'G:H' => 'REASURANSI',
+                ]);
                 $this->applyHeader($sheet, self::LAST_COLUMN);
-                $this->applyTableBorders($sheet, self::FIRST_COLUMN.'3:'.self::LAST_COLUMN.($dataLast + 1));
-                $this->applyZebra($sheet, 'A', 'H', 'F2F2F2');
+                $this->applyTableBorders($sheet, self::FIRST_COLUMN.ReportDesign::HEADER_ROW.':'.self::LAST_COLUMN.$totalRow);
+                $this->applyZebra($sheet, 'A', 'H');
                 $this->applyColumnWidths($sheet, [
                     'A' => 16,
                     'B' => 30,
@@ -109,23 +120,28 @@ class ProductionPremiumSheet implements FromCollection, WithEvents, WithTitle
                     'H' => 22,
                 ]);
 
-                if ($dataLast >= 4) {
-                    $this->setColumnNumberFormat($sheet, 'C', '4', (string) $dataLast, 'dd/mm/yyyy');
+                if ($dataLast >= ReportDesign::DATA_START_ROW) {
+                    $this->setColumnNumberFormat($sheet, 'C', (string) ReportDesign::DATA_START_ROW, (string) $dataLast, 'dd/mm/yyyy');
                     foreach (['D', 'E', 'F', 'H'] as $column) {
-                        $this->setColumnNumberFormat($sheet, $column, '4', (string) $dataLast, '#,##0');
+                        $this->setColumnNumberFormat($sheet, $column, (string) ReportDesign::DATA_START_ROW, (string) $dataLast, '#,##0');
                     }
 
-                    $this->applyAlignment($sheet, 'A4:A'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'C4:C'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'G4:G'.$dataLast, Alignment::HORIZONTAL_CENTER);
-                    $this->applyAlignment($sheet, 'D4:H'.$dataLast, Alignment::HORIZONTAL_RIGHT);
+                    $this->applyAlignment($sheet, 'A'.ReportDesign::DATA_START_ROW.':A'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'C'.ReportDesign::DATA_START_ROW.':C'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'G'.ReportDesign::DATA_START_ROW.':G'.$dataLast, Alignment::HORIZONTAL_CENTER);
+                    $this->applyAlignment($sheet, 'D'.ReportDesign::DATA_START_ROW.':H'.$dataLast, Alignment::HORIZONTAL_RIGHT);
+
+                    $sheet->getStyle('B'.ReportDesign::DATA_START_ROW.':B'.$dataLast)->getAlignment()->setWrapText(true);
                 }
 
-                $sheet->mergeCells('A'.($dataLast + 1).':G'.($dataLast + 1));
-                $this->applyTotalStyle($sheet, $totalRow);
-                $this->setColumnNumberFormat($sheet, 'H', '4', (string) ($dataLast + 1), '#,##0');
+                $sheet->mergeCells('A'.$totalRow.':G'.$totalRow);
+                $this->applyTotalRow($sheet, 'A'.$totalRow.':'.self::LAST_COLUMN.$totalRow);
+                $this->setColumnNumberFormat($sheet, 'H', (string) ReportDesign::DATA_START_ROW, (string) $totalRow, '#,##0');
+                $this->applyAlignment($sheet, 'A'.$totalRow.':G'.$totalRow, Alignment::HORIZONTAL_CENTER);
 
                 $this->freezeAndFilter($sheet, self::LAST_COLUMN);
+                $this->applySignatureFooter($sheet, self::LAST_COLUMN, $totalRow + 2);
+                $this->applyDisclaimer($sheet, self::LAST_COLUMN, $totalRow + 6);
                 $this->setupPrint($sheet);
             },
         ];

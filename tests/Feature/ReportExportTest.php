@@ -88,7 +88,7 @@ class ReportExportTest extends TestCase
         );
     }
 
-    public function test_sheet_pertama_memiliki_judul_header_dan_total(): void
+    public function test_sheet_pertama_memiliki_header_block_band_judul_dan_total(): void
     {
         $this->seedDataset();
 
@@ -98,12 +98,33 @@ class ReportExportTest extends TestCase
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getSheet(0);
 
-        $this->assertSame('Laporan Produksi & Premi Reasuransi (Borderaux Premi)', $sheet->getCell('A1')->getValue());
-        $this->assertSame('No Polis', $sheet->getCell('A3')->getValue());
-        $this->assertSame('Premi Reasuransi', $sheet->getCell('H3')->getValue());
-        $this->assertSame('TOTAL', $sheet->getCell('A6')->getValue());
-        $this->assertSame('=SUM(H4:H5)', $sheet->getCell('H6')->getValue());
-        $this->assertSame('A4', $sheet->getFreezePane());
+        $this->assertSame('PT ASURANSI CONTOH', $sheet->getCell('A1')->getValue());
+        $this->assertSame('LAPORAN PRODUKSI & PREMI REASURANSI — BORDERAUX PREMI', $sheet->getCell('A3')->getValue());
+        $this->assertSame('INFORMASI POLIS', $sheet->getCell('A5')->getValue());
+        $this->assertSame('UANG PERTANGGUNGAN (Rp)', $sheet->getCell('D5')->getValue());
+        $this->assertSame('REASURANSI', $sheet->getCell('G5')->getValue());
+        $this->assertSame('No Polis', $sheet->getCell('A6')->getValue());
+        $this->assertSame('Premi Reasuransi', $sheet->getCell('H6')->getValue());
+        $this->assertSame('TOTAL', $sheet->getCell('A9')->getValue());
+        $this->assertSame('=SUM(H7:H8)', $sheet->getCell('H9')->getValue());
+        $this->assertSame('A7', $sheet->getFreezePane());
+    }
+
+    public function test_sheet_korporat_memiliki_footer_dan_print_pengaturan(): void
+    {
+        $this->seedDataset();
+
+        Excel::store(new ReinsuranceWorkbookExport, 'test_sheet_korporat.xlsx', 'local');
+        $path = Storage::disk('local')->path('test_sheet_korporat.xlsx');
+
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getSheet(0);
+
+        $this->assertFalse($sheet->getShowGridlines());
+        $this->assertSame('Dibuat oleh,', $sheet->getCell('A11')->getValue());
+        $this->assertSame('Disetujui oleh,', $sheet->getCell('E11')->getValue());
+        $this->assertStringContainsString('Dokumen ini dibuat otomatis', $sheet->getCell('A15')->getValue());
+        $this->assertStringContainsString('Halaman &P dari &N', (string) $sheet->getHeaderFooter()->getOddFooter());
     }
 
     public function test_sheet_ketiga_memuat_formula_lintas_sheet(): void
@@ -115,11 +136,12 @@ class ReportExportTest extends TestCase
 
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getSheet(2);
-
-        $this->assertSame('Ringkasan Akun Keuangan Reasuransi', $sheet->getCell('A1')->getValue());
-        $this->assertSame("=SUM('Borderaux Premi'!H4:H5)", $sheet->getCell('B4')->getValue());
-        $this->assertSame('=B4*B5', $sheet->getCell('B6')->getValue());
-        $this->assertSame('=B7-B8', $sheet->getCell('B9')->getValue());
+        $this->assertSame('PT ASURANSI CONTOH', $sheet->getCell('A1')->getValue());
+        $this->assertSame('RINGKASAN AKUN KEUANGAN REASURANSI', $sheet->getCell('A3')->getValue());
+        $this->assertSame('Metrik', $sheet->getCell('A6')->getValue());
+        $this->assertSame("=SUM('Borderaux Premi'!H7:H8)", $sheet->getCell('B7')->getValue());
+        $this->assertSame('=B7*B8', $sheet->getCell('B9')->getValue());
+        $this->assertSame('=B10-B11', $sheet->getCell('B12')->getValue());
     }
 
     public function test_ekspor_tetap_berhasil_saat_database_kosong(): void

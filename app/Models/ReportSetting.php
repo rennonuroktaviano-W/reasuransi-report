@@ -25,7 +25,7 @@ class ReportSetting extends Model
             ['id' => 1],
             [
                 'commission_rate' => 0.10,
-                'company_name' => null,
+                'company_name' => 'Deswa Invisco Multitama',
                 'report_title' => 'Laporan Reasuransi',
             ]
         );

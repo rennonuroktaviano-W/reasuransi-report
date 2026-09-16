@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
             ['id' => 1],
             [
                 'commission_rate' => 0.10,
-                'company_name' => 'PT Asuransi Contoh',
+                'company_name' => 'Deswa Invisco Multitama',
                 'report_title' => 'Laporan Reasuransi',
             ]
         );
