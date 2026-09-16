@@ -45,8 +45,10 @@ class ProductionController extends Controller
     {
         ReinsuranceProduction::create($request->validated());
 
-        return to_route('productions.index')
+        $redirect = to_route('productions.index')
             ->with('success', 'Data polis berhasil ditambahkan.');
+
+        return $this->appendUPMismatchWarning($request->validated(), $redirect);
     }
 
     public function edit(ReinsuranceProduction $production): Response
@@ -60,8 +62,29 @@ class ProductionController extends Controller
     {
         $production->update($request->validated());
 
-        return to_route('productions.index')
+        $redirect = to_route('productions.index')
             ->with('success', 'Data polis berhasil diperbarui.');
+
+        return $this->appendUPMismatchWarning($request->validated(), $redirect);
+    }
+
+    private function appendUPMismatchWarning(array $data, RedirectResponse $redirect): RedirectResponse
+    {
+        $sum = (float) $data['sum_insured'];
+        $retention = (float) $data['retention'];
+        $ceded = (float) $data['ceded_amount'];
+        $tolerance = max($sum * 0.01, 10000);
+
+        if (abs(($retention + $ceded) - $sum) > $tolerance) {
+            $total = $retention + $ceded;
+            $redirect->with('warning', sprintf(
+                'Perhatian: Uang Pertanggungan (UP Utama) sebesar Rp %s belum sama dengan jumlah Sendiri (Retention) ditambah UP Direasuransikan (Ceded) sebesar Rp %s. Mohon dicek kembali.',
+                number_format($sum),
+                number_format($total)
+            ));
+        }
+
+        return $redirect;
     }
 
     public function destroy(ReinsuranceProduction $production): RedirectResponse

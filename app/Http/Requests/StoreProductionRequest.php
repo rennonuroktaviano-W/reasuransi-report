@@ -35,20 +35,15 @@ class StoreProductionRequest extends FormRequest
         ];
     }
 
-    public function withValidator($validator): void
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
     {
-        $validator->after(function ($validator) {
-            $sum = (float) $this->input('sum_insured');
-            $retention = (float) $this->input('retention');
-            $ceded = (float) $this->input('ceded_amount');
-
-            if (abs(($retention + $ceded) - $sum) > 0.01) {
-                $validator->errors()->add(
-                    'sum_insured',
-                    'Retention ditambah Ceded Amount (Sisa UP Direasuransikan) harus sama dengan Uang Pertanggungan (UP Utama).'
-                );
-            }
-        });
+        return [
+            'birth_date.before' => 'Tanggal Lahir tidak boleh di masa depan.',
+            'ceded_amount.lte' => 'UP Direasuransikan (Ceded) tidak boleh lebih besar dari Uang Pertanggungan (UP Utama).',
+        ];
     }
 
     /**

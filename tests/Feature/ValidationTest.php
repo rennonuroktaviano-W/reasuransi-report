@@ -50,13 +50,31 @@ class ValidationTest extends TestCase
         ]))->assertSessionHasErrors('ceded_amount');
     }
 
-    public function test_retention_plus_ceded_harus_sama_dengan_up(): void
+    public function test_selisih_kecil_retention_ceded_up_tetap_lolos_tanpa_peringatan(): void
     {
-        $this->post(route('productions.store'), $this->validProductionPayload([
+        $response = $this->post(route('productions.store'), $this->validProductionPayload([
+            'sum_insured' => 1000000000,
+            'retention' => 500000000,
+            'ceded_amount' => 500200000,
+        ]));
+
+        $response->assertRedirect(route('productions.index'));
+        $response->assertSessionMissing('warning');
+        $this->assertDatabaseHas('reinsurance_productions', ['policy_number' => 'POL-VALID-001']);
+    }
+
+    public function test_selisih_besar_retention_ceded_up_tetap_tersimpan_tapi_memberi_peringatan(): void
+    {
+        $response = $this->post(route('productions.store'), $this->validProductionPayload([
             'sum_insured' => 1000000000,
             'retention' => 500000000,
             'ceded_amount' => 400000000,
-        ]))->assertSessionHasErrors('sum_insured');
+        ]));
+
+        $response->assertRedirect(route('productions.index'));
+        $response->assertSessionHas('warning');
+        $response->assertSessionHas('success', 'Data polis berhasil ditambahkan.');
+        $this->assertDatabaseHas('reinsurance_productions', ['policy_number' => 'POL-VALID-001']);
     }
 
     public function test_gabungan_retention_ceded_sama_up_berhasil(): void

@@ -41,6 +41,17 @@ class UpdateClaimRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    public function messages(): array
+    {
+        return [
+            'reinsurance_recovery.lte' => 'Recovery Reasuransi tidak boleh lebih besar dari Total Nilai Klaim.',
+            'claim_status.in' => 'Status klaim yang dipilih tidak valid.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return [

@@ -1,6 +1,7 @@
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import CurrencyInput from '@/Components/CurrencyInput';
+import { formatRupiah, upMismatchInfo } from '@/utils';
 
 const REINSURANCE_TYPES = ['Surplus', 'Quota Share', 'Fac/Surplus', 'Facultative', 'Other'];
 
@@ -45,6 +46,8 @@ export default function Form({ production }) {
         reinsurance_premium: payload.reinsurance_premium === '' || payload.reinsurance_premium === null ? null : Number(payload.reinsurance_premium),
     });
 
+    const mismatch = upMismatchInfo(data.sum_insured, data.retention, data.ceded_amount);
+
     const inputClass = (hasError) =>
         `w-full rounded-lg border px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${
             hasError ? 'border-red-400' : 'border-gray-300'
@@ -60,6 +63,9 @@ export default function Form({ production }) {
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         Isi data polis dan premi reasuransi dengan lengkap. Field bertanda * wajib diisi.
+                    </p>
+                    <p className="text-sm text-blue-600 mt-2">
+                        Petunjuk: Uang Pertanggungan (UP Utama) seharusnya terbagi menjadi Sendiri (Retention) + UP Direasuransikan (Ceded).
                     </p>
                 </div>
 
@@ -167,6 +173,16 @@ export default function Form({ production }) {
                             {errors.reinsurance_premium && <p className="mt-1 text-xs text-red-600">{errors.reinsurance_premium}</p>}
                         </div>
                     </div>
+
+                    {mismatch && (
+                        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
+                            <p className="text-sm text-amber-800">
+                                Perhatian: Uang Pertanggungan (UP Utama) sebesar {formatRupiah(mismatch.sum)} belum
+                                sesuai dengan jumlah Sendiri (Retention) + UP Direasuransikan (Ceded) sebesar{' '}
+                                {formatRupiah(mismatch.total)}. Data tetap bisa disimpan, tapi mohon periksa kembali.
+                            </p>
+                        </div>
+                    )}
 
                     <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
                         <Link
