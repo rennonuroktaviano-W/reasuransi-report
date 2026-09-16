@@ -32,6 +32,6 @@ class ReinsuranceClaim extends Model
      */
     public function production(): BelongsTo
     {
-        return $this->belongsTo(ReinsuranceProduction::class);
+        return $this->belongsTo(ReinsuranceProduction::class, 'production_id');
     }
 }

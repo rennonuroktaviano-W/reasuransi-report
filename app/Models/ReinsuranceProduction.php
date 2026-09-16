@@ -37,6 +37,6 @@ class ReinsuranceProduction extends Model
      */
     public function claims(): HasMany
     {
-        return $this->hasMany(ReinsuranceClaim::class);
+        return $this->hasMany(ReinsuranceClaim::class, 'production_id');
     }
 }
